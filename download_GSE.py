@@ -3,6 +3,7 @@ from urlparse import urlparse
 import tempfile
 import subprocess
 import os
+import sys
 import xml.etree.ElementTree as etree
 import string
 
@@ -184,25 +185,46 @@ organism_info = {
 }
 
 if __name__ == '__main__':
-    for bat, (output_dir, paper_names) in organism_info.items():
-        for paper_name in paper_names:
+    if len(sys.argv) == 1:
+        for bat, (output_dir, paper_names) in organism_info.items():
+            for paper_name in paper_names:
+    
+                while len(output_dir) > 1 and output_dir[-1] == r'/':
+                    # Delete trailing '/'s. They mess up the fastq-dump
+                    output_dir = output_dir[:-1]
+            
+                if paper_name in experiments:
+                    accession, condition = experiments[paper_name]
+            
+                    xml_fn = get_xml(output_dir, accession)
+                    samples = extract_samples_from_xml(xml_fn, condition=condition)
+                elif paper_name in non_GSE_experiments:
+                    samples = non_GSE_experiments[paper_name]
+            
+                for sample in samples:
+                    print sample[0]
+                    for url in sample[1]:
+                        print '\t', url
+            
+                sra_fns = download_samples(output_dir, samples)
+                #dump_fastqs(sra_fns, paired=False)
 
-            while len(output_dir) > 1 and output_dir[-1] == r'/':
-                # Delete trailing '/'s. They mess up the fastq-dump
-                output_dir = output_dir[:-1]
-        
-            if paper_name in experiments:
-                accession, condition = experiments[paper_name]
-        
-                xml_fn = get_xml(output_dir, accession)
-                samples = extract_samples_from_xml(xml_fn, condition=condition)
-            elif paper_name in non_GSE_experiments:
-                samples = non_GSE_experiments[paper_name]
-        
-            for sample in samples:
-                print sample[0]
-                for url in sample[1]:
-                    print '\t', url
-        
-            sra_fns = download_samples(output_dir, samples)
-            #dump_fastqs(sra_fns, paired=False)
+    elif len(sys.argv) == 3:
+        if sys.argv[1] == 'paired':
+            paired=True
+        elif sys.argv[1] == 'single':
+            paired=False
+        else:
+            sys.exit('Unrecognized first argument: ' + sys.argv[1])
+
+        ftp_address = sys.argv[2]
+        while ftp_address[-1] == r'/':
+            ftp_address = ftp_address[:-1]
+
+        output_dir = '.'
+        samples = [('',[ftp_address])]
+        sra_fns = download_samples(output_dir, samples)
+        dump_fastqs(sra_fns, paired=paired)
+
+    else:
+        sys.exit('Usage: download_GSE.py [<paired or single> <ftp address of srp head directory>]')
