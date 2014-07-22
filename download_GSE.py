@@ -109,7 +109,7 @@ def dump_fastqs(sra_fns, paired=False):
             # seq name line.
             fastq_dump_command = ['fastq-dump',
                                   '--split-3',
-                                  '--defline-seq', '@$ac.$si.$ri',
+                                  '--defline-seq', '@$ac.$si/$ri',
                                   '--defline-qual', '+',
                                   '-O', head,
                                   sra_fn,
