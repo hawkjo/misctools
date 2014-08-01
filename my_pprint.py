@@ -107,17 +107,12 @@ def _format_dict(dct, indent, width, depth):
     outstr = ''
     usable_width = width - indent * depth
 
-    repr_list = ['%s: %s' % (repr(k), repr(v)) for k, v in sorted(dct.items())]
-    tmp_usable_width = usable_width - (indent + 2*depth) # For '[ ' and ']' at beginning and end
-    min_chars_between = 3 # a comma and two spaces
-    max_element_width = max( len(x) for x in repr_list ) + min_chars_between
+    repr_sorted_dct = '{' + ' '*(indent-1) + \
+            ',  '.join( ['%s: %s' % (repr(k), repr(v)) for k, v in sorted(dct.items())] ) + '}'
 
-    if len( str(dct) ) <= usable_width:
-        return _indent_str( indent, depth ) + str(sorted(dct))
+    if len( repr_sorted_dct ) <= usable_width:
+        return _indent_str( indent, depth ) + repr_sorted_dct
 
-#    elif usable_width < 15 or _needs_recursion(dct) \
-#            or max_element_width >= tmp_usable_width - min_chars_between \
-#            or max_element_width > 40:
     else:
         tmpstr = ''
         if usable_width < 15:
@@ -138,36 +133,6 @@ def _format_dict(dct, indent, width, depth):
         spaces_to_remove = indent * (depth+1)
         return _indent_str( indent, depth ) + '{' + ' '*(indent-1) \
                     + tmpstr[spaces_to_remove:-2] + ' ' + '}'
-
-#    else:
-#        repr_list = ['%s: %s' % (repr(k), repr(v)) for k, v in sorted(dct.items())]
-#    
-#        usable_width -= (indent + 2*depth) # For '[ ' and ']' at beginning and end
-#        min_chars_between = 3 # a comma and two spaces
-#        min_element_width = min( len(x) for x in repr_list ) + min_chars_between
-#        max_element_width = max( len(x) for x in repr_list ) + min_chars_between
-#
-#        # already determined that max_element_width < usable_width
-#
-#        # Start with max possible number of columns and reduce until it fits
-#        ncol = min( len(repr_list), usable_width / min_element_width  )
-#        while True:
-#            col_widths = [ max( len(x) + min_chars_between \
-#                                for j, x in enumerate( repr_list ) if j % ncol == i ) \
-#                                for i in range(ncol) ]
-#            if sum( col_widths ) <= usable_width: break
-#            else: ncol -= 1
-#    
-#        outstr += _indent_str( indent, depth ) + '{' + ' '*(indent-1)
-#
-#        for i, x in enumerate(repr_list):
-#            if i + 1 != len(repr_list): x += ','
-#            outstr += x.ljust( col_widths[ i % ncol ] ) 
-#            if i + 1 == len(repr_list):
-#                outstr += '}'
-#            elif (i+1) % ncol == 0:
-#                outstr += '\n' + _indent_str( indent, depth + 1 )
-#        return outstr
 
 if __name__ == '__main__':
     import random
