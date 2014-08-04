@@ -1,7 +1,7 @@
 import sys, warnings
 from terminalsize import get_terminal_size
 
-def pprint(thing, stream=None, indent=2, width=None, depth=0):
+def pprint(thing, stream=None, indent=4, width=None, depth=0):
     if stream is None: stream = sys.stdout
     indent = int(indent)
     if width is None:
@@ -17,17 +17,15 @@ def pprint(thing, stream=None, indent=2, width=None, depth=0):
 def _isiterable(thing): return hasattr(thing, '__iter__')
 
 def _needs_pprint(thing):
-    if _isiterable(thing) or isinstance(thing, dict): 
-        return True
-    return False
+    return _isiterable(thing) # dicts are also iterable
 
 def _needs_recursion(thing):
-    if _isiterable(thing): 
-        for x in thing:
+    if isinstance(thing, dict):
+        for x in thing.values():
             if _needs_pprint(x): return True
         return False
-    elif isinstance(thing, dict):
-        for x in thing.values():
+    elif _isiterable(thing): 
+        for x in thing:
             if _needs_pprint(x): return True
         return False
     else:
