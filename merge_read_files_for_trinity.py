@@ -1,17 +1,5 @@
 import sys, os, re, gzip
 
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        sys.exit('Usage: merge_read_files_for_trinity.py <dir with fastq files> [<output dir>]')
-    
-    input_dir = sys.argv[1]
-    if len(sys.argv) >= 3:
-        output_dir = sys.argv[2]
-    else:
-        output_dir = '.'
-
-    merge_read_files_for_trinity( input_dir, output_dir )
-
 def merge_read_files_for_trinity( input_dir, output_dir ):
     fastq_fnames = [fname for fname in os.listdir(input_dir) if 'fastq' in fname]
     
@@ -109,3 +97,16 @@ def merge_read_files_for_trinity( input_dir, output_dir ):
                     out1.write( '\n'.join( [defline,seqline,plusline,qualline] ) + '\n' )
 
     return outname1, outname2
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        sys.exit('Usage: merge_read_files_for_trinity.py <dir with fastq files> [<output dir>]')
+    
+    input_dir = sys.argv[1]
+    if len(sys.argv) >= 3:
+        output_dir = sys.argv[2]
+    else:
+        output_dir = '.'
+
+    merge_read_files_for_trinity( input_dir, output_dir )
+
