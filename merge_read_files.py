@@ -37,7 +37,7 @@ def get_paired_unpaired_filenames( dname ):
     print
     return paired_fnames, unpaired_fnames 
 
-def merge_paired_fastq_files( paired_fnames, outname1, outname2, mode='w' ):
+def merge_paired_fastq_files( paired_fnames, input_dir, outname1, outname2, mode='w' ):
     with open(outname1, mode) as out1, open(outname2, mode) as out2:
         for fname1, fname2 in paired_fnames:
             print 'Copying',(fname1,fname2)
@@ -71,7 +71,7 @@ def merge_paired_fastq_files( paired_fnames, outname1, outname2, mode='w' ):
                     out1.write( '\n'.join( [defline1,seqline1,plusline1,qualline1] ) + '\n' )
                     out2.write( '\n'.join( [defline2,seqline2,plusline2,qualline2] ) + '\n' )
 
-def merge_unpaired_fastq_files( unpaired_fnames, outname, mode='w' ):
+def merge_unpaired_fastq_files( unpaired_fnames, input_dir, outname, mode='w' ):
     with open(outname, mode) as out:
         for fname in unpaired_fnames:
             print 'Copying',fname
@@ -102,12 +102,12 @@ def merge_read_files_for_trinity( input_dir, output_dir ):
     if paired_fnames:
         outname1 = os.path.join( output_dir, 'reads_left_1.fastq' )
         outname2 = os.path.join( output_dir, 'reads_right_2.fastq' )
-        merge_paired_fastq_files( paired_fnames, outname1, outname2, mode='w' )
-        merge_unpaired_fastq_files( unpaired_fnames, outname1, mode='a' )
+        merge_paired_fastq_files( paired_fnames, input_dir, outname1, outname2, mode='w' )
+        merge_unpaired_fastq_files( unpaired_fnames, input_dir, outname1, mode='a' )
         return outname1, outname2
     else:
         outname = os.path.join( output_dir, 'reads_se.fastq' )
-        merge_unpaired_fastq_files( unpaired_fnames, outname, mode='w' )
+        merge_unpaired_fastq_files( unpaired_fnames, input_dir, outname, mode='w' )
         return outname, None
 
 def merge_read_files_for_transabyss( input_dir, output_dir ):
@@ -116,11 +116,11 @@ def merge_read_files_for_transabyss( input_dir, output_dir ):
     outname2 = os.path.join( output_dir, 'paired_reads_right_2.fastq' )
     outname_se = os.path.join( output_dir, 'unpaired_reads.fastq'  )
     if paired_fnames:
-        merge_paired_fastq_files( paired_fnames, outname1, outname2, mode='w' )
-        merge_unpaired_fastq_files( unpaired_fnames, outname_se, mode='w' )
+        merge_paired_fastq_files( paired_fnames, input_dir, outname1, outname2, mode='w' )
+        merge_unpaired_fastq_files( unpaired_fnames, input_dir, outname_se, mode='w' )
         return outname1, outname2, outname_se
     else:
-        merge_unpaired_fastq_files( unpaired_fnames, outname_se, mode='w' )
+        merge_unpaired_fastq_files( unpaired_fnames, input_dir, outname_se, mode='w' )
         return None, None, outname_se
 
 if __name__ == "__main__":
