@@ -5,11 +5,13 @@ import struct
 import platform
 import subprocess
  
+# Code from:
+# http://stackoverflow.com/questions/566746/how-to-get-console-window-width-in-python
  
 def get_terminal_size():
     """ getTerminalSize()
      - get width and height of console
-     - works on linux,os x,windows,cygwin(windows)
+     - works on linux, os x, windows, cygwin(windows)
      originally retrieved from:
      http://stackoverflow.com/questions/566746/how-to-get-console-window-width-in-python
     """
