@@ -1,5 +1,5 @@
 from Bio import Entrez
-from my_pprint import pprint
+from mypprint import pprint
 
 Entrez.email = 'hawkjo@gmail.com'
 
