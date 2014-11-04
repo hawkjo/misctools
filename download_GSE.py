@@ -1,22 +1,22 @@
 from ftplib import FTP
 from urlparse import urlparse
-import tempfile
 import subprocess
 import os
 import sys
 import xml.etree.ElementTree as etree
 import string
 
+
 def get_xml(output_dir, accession):
     xml_tail = '{0}_family.xml'.format(accession)
     xml_fn = '{0}/{1}'.format(output_dir, xml_tail)
     tgz_fn = xml_fn + '.tgz'
 
-    xml_url_template = 'ftp://ftp.ncbi.nlm.nih.gov/geo/series/{prefix}nnn/{accession}/miniml/{xml_tail}.tgz'
+    xml_url_template = \
+        'ftp://ftp.ncbi.nlm.nih.gov/geo/series/{prefix}nnn/{accession}/miniml/{xml_tail}.tgz'
     xml_url = xml_url_template.format(prefix=accession[:5],
                                       accession=accession,
-                                      xml_tail=xml_tail,
-                                     )
+                                      xml_tail=xml_tail)
 
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir)
@@ -29,6 +29,7 @@ def get_xml(output_dir, accession):
     os.remove(tgz_fn)
 
     return xml_fn
+
 
 def extract_samples_from_xml(xml_fn, condition=lambda x: True):
     samples = []
@@ -52,12 +53,14 @@ def extract_samples_from_xml(xml_fn, condition=lambda x: True):
                     if not condition(sample_name):
                         skip_sample = True
                         break
-                elif grand.tag.endswith('Supplementary-Data') and grand.attrib['type'] == 'SRA Experiment':
+                elif (grand.tag.endswith('Supplementary-Data')
+                        and grand.attrib['type'] == 'SRA Experiment'):
                     sample_URL = grand.text.strip()
                     sample_URLs.append(sample_URL)
             if not skip_sample:
                 samples.append((sample_name, sample_URLs))
     return samples
+
 
 def download_samples(output_dir, samples):
     ascp_bin = '/home/jah/.aspera/connect/bin/ascp'
@@ -68,7 +71,7 @@ def download_samples(output_dir, samples):
         sample_dir = '{0}/{1}/data'.format(output_dir, sample_name)
         if not os.path.isdir(sample_dir):
             os.makedirs(sample_dir)
-        
+
         for sample_URL in sample_URLs:
             parsed_sample_url = urlparse(sample_URL)
             f = FTP(parsed_sample_url.netloc)
@@ -84,24 +87,23 @@ def download_samples(output_dir, samples):
                 parsed_run_url = urlparse(run_url)
                 wget_command = ['wget',
                                 '-P', sample_dir,
-                                run_url,
-                               ]
+                                run_url]
                 ascp_command = [ascp_bin,
                                 '-i', ascp_key,
                                 '-QT',
                                 '-l', '300m',
                                 'anonftp@{0}:{1}'.format(parsed_run_url.netloc, parsed_run_url.path),
-                                sample_dir,
-                               ]
+                                sample_dir]
                 subprocess.check_call(ascp_command)
                 sra_fn = '{0}/{1}.sra'.format(sample_dir, run)
                 sra_fns.append(sra_fn)
 
     return sra_fns
 
+
 def dump_fastqs(sra_fns, paired=False):
     for sra_fn in sra_fns:
-        print "fastq-dump'ing {0}".format(sra_fn) 
+        print "fastq-dump'ing {0}".format(sra_fn)
         head, tail = os.path.split(sra_fn)
         root, ext = os.path.splitext(sra_fn)
         if paired:
@@ -112,15 +114,13 @@ def dump_fastqs(sra_fns, paired=False):
                                   '--defline-seq', '@$ac.$si/$ri',
                                   '--defline-qual', '+',
                                   '-O', head,
-                                  sra_fn,
-                                 ]
+                                  sra_fn]
         else:
             fastq_dump_command = ['fastq-dump',
                                   '--defline-seq', '@$ac.$si',
                                   '--defline-qual', '+',
                                   '-O', head,
-                                  sra_fn,
-                                 ]
+                                  sra_fn]
         subprocess.check_call(fastq_dump_command)
         os.remove(sra_fn)
 
@@ -165,55 +165,55 @@ non_GSE_experiments = {
         ],
 }
 
-organism_info = { 
-        'ArtibeusJamaicensis': ('/home/hawkjo/SaraProjects/Chiroptera/external_bats/ArtibeusJamaicensis',
-            ['shaw2012transcriptome']),
-        'PteropusAlecto': ('/home/hawkjo/SaraProjects/Chiroptera/external_bats/PteropusAlecto',
-            ['zhang2013comparative','papenfuss2012immune']),
-        'MyotisLucifigus': ('/home/hawkjo/SaraProjects/Chiroptera/external_bats/MyotisLucifigus',
-            ['phillips2014dietary']),
-        'MyotisDavidii': ('/home/hawkjo/SaraProjects/Chiroptera/external_bats/MyotisDavidii',
-            ['zhang2013comparative','wu2013deep']),
-        'MyotisBrandtii': ('/home/hawkjo/SaraProjects/Chiroptera/external_bats/MyotisBrandtii',
-            ['seim2013genome']),
-        'MyotisRicketti': ('/home/hawkjo/SaraProjects/Chiroptera/external_bats/MyotisRicketti',
-            ['dong2013comparative']),
-        'CynopterusSphinx': ('/home/hawkjo/SaraProjects/Chiroptera/external_bats/CynopterusSphinx',
-            ['dong2013comparative']),
-        'DesmodusRotundus': ('/home/hawkjo/SaraProjects/Chiroptera/external_bats/DesmodusRotundus',
-            ['gracheva2011ganglion','francischetti2013vampirome','low2013dracula']),
+organism_info = {
+    'ArtibeusJamaicensis': ('/home/hawkjo/SaraProjects/Chiroptera/external_bats/ArtibeusJamaicensis',
+                            ['shaw2012transcriptome']),
+    'PteropusAlecto': ('/home/hawkjo/SaraProjects/Chiroptera/external_bats/PteropusAlecto',
+                            ['zhang2013comparative', 'papenfuss2012immune']),
+    'MyotisLucifigus': ('/home/hawkjo/SaraProjects/Chiroptera/external_bats/MyotisLucifigus',
+                            ['phillips2014dietary']),
+    'MyotisDavidii': ('/home/hawkjo/SaraProjects/Chiroptera/external_bats/MyotisDavidii',
+                            ['zhang2013comparative', 'wu2013deep']),
+    'MyotisBrandtii': ('/home/hawkjo/SaraProjects/Chiroptera/external_bats/MyotisBrandtii',
+                            ['seim2013genome']),
+    'MyotisRicketti': ('/home/hawkjo/SaraProjects/Chiroptera/external_bats/MyotisRicketti',
+                            ['dong2013comparative']),
+    'CynopterusSphinx': ('/home/hawkjo/SaraProjects/Chiroptera/external_bats/CynopterusSphinx',
+                            ['dong2013comparative']),
+    'DesmodusRotundus': ('/home/hawkjo/SaraProjects/Chiroptera/external_bats/DesmodusRotundus',
+                            ['gracheva2011ganglion', 'francischetti2013vampirome', 'low2013dracula']),
 }
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:
         for bat, (output_dir, paper_names) in organism_info.items():
             for paper_name in paper_names:
-    
+
                 while len(output_dir) > 1 and output_dir[-1] == r'/':
                     # Delete trailing '/'s. They mess up the fastq-dump
                     output_dir = output_dir[:-1]
-            
+
                 if paper_name in experiments:
                     accession, condition = experiments[paper_name]
-            
+
                     xml_fn = get_xml(output_dir, accession)
                     samples = extract_samples_from_xml(xml_fn, condition=condition)
                 elif paper_name in non_GSE_experiments:
                     samples = non_GSE_experiments[paper_name]
-            
+
                 for sample in samples:
                     print sample[0]
                     for url in sample[1]:
                         print '\t', url
-            
+
                 sra_fns = download_samples(output_dir, samples)
                 #dump_fastqs(sra_fns, paired=False)
 
     elif len(sys.argv) == 3:
         if sys.argv[1] == 'paired':
-            paired=True
+            paired = True
         elif sys.argv[1] == 'single':
-            paired=False
+            paired = False
         else:
             sys.exit('Unrecognized first argument: ' + sys.argv[1])
 
@@ -222,7 +222,7 @@ if __name__ == '__main__':
             ftp_address = ftp_address[:-1]
 
         output_dir = '.'
-        samples = [('',[ftp_address])]
+        samples = [('', [ftp_address])]
         sra_fns = download_samples(output_dir, samples)
         dump_fastqs(sra_fns, paired=paired)
 
