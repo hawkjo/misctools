@@ -45,3 +45,14 @@ def download_all_hits(db, search_term, outfname, batch_size=20, outfmt='fasta'):
             fetch_handle.close()
             out.write(data)
     return count
+
+
+def spell_check(query):
+    handle = Entrez.espell(term=query)
+    record = Entrez.read(handle)
+    return record['CorrectedQuery']
+
+
+def num_hits(db, search_term, batch_size=20, outfmt='fasta'):
+    search_results = Entrez.read(Entrez.esearch(db=db, term=search_term, usehistory='y'))
+    return int(search_results['Count'])
