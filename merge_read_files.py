@@ -5,7 +5,8 @@ import gzip
 
 
 def get_paired_unpaired_filenames(dname):
-    fastq_fnames = [fname for fname in os.listdir(dname) if 'fastq' in fname]
+    fastq_fnames = [fname for fname in os.listdir(dname)
+                    if fname.endswith('.fastq') or fname.endswith('.fastq.gz')]
 
     paired_fnames = []
     unpaired_fnames = []
