@@ -2,6 +2,8 @@ import sys
 import os
 import gzip
 import paramiko
+from itertools import izip_longest
+from IPython.display import HTML
 
 
 def get_gzip_friendly_open_fnc(*args):
@@ -110,3 +112,65 @@ class ssh:
                 self.sftp_client.mkdir(folder)
                 self.sftp_client.chdir(folder)
         self.sftp_client.chdir(starting_dir)
+
+
+def grouper(n, iterable, fillvalue=None):
+    "grouper(3, 'ABCDEFG', 'x') --> ABC DEF Gxx"
+    args = [iter(iterable)] * n
+    return izip_longest(fillvalue=fillvalue, *args)
+
+
+def getToggleScript():
+    return '''<script>
+code_show=true; 
+function code_toggle() {
+ if (code_show){
+  $('div.input').hide();
+  } else {
+  $('div.input').show();
+  }
+ code_show = !code_show
+} 
+$( document ).ready(code_toggle);
+</script>
+The raw code for this IPython notebook is by default hidden for easier reading.
+To toggle on/off the raw code, click <a href="javascript:code_toggle()">here</a>.'''
+
+
+def add_toggle_script():
+    HTML(getToggleScript())
+
+
+def dot():
+    sys.stdout.write('.')
+    sys.stdout.flush()
+
+
+def walk_dict_tree_at_given_depth(d, depth, only_keys=False, prev_args=[]):
+    """
+    Allow for easy iteration at given depth of structured dict-of-dicts tree.
+    """
+    # There are two cases which must be handled: 
+    #       1) The objects at depth == depth are dicts, in which case we return the keys or dicts
+    #           as specified by only_keys
+    #       2) The objects at depth == depth are not dicts, in which case we return the values.
+    # If we wish to return dicts or non-dict values, we must catch them when depth == 2.
+    if depth == 1:
+        # We only arrive here if only_keys == True.
+        for k in sorted(d.keys()):
+            yield prev_args + [k]
+        return
+    elif depth == 2:
+        if not only_keys or not isinstance(d.itervalues().next(), dict): # Test for non-dict leaves
+            for k, v in sorted(d.items()):
+                yield prev_args + [k, v]
+            return
+        # else continue on as ususal
+    try:
+        for k, v in sorted(d.items()):
+            for args in walk_dict_tree_at_given_depth(v, depth-1, only_keys, prev_args + [k]):
+                yield args
+    except AttributeError:
+        raise AttributeError('Tree has less than requested depth.')
+    except:
+        raise
