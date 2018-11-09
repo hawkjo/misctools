@@ -182,4 +182,4 @@ def python_intervals_overlap(interval1, interval2):
     return (query_start <= subject_start < query_end
             or query_start < subject_end <= query_end
             or subject_start <= query_start < subject_end
-            or subject_start < query_end <= subject_end):
+            or subject_start < query_end <= subject_end)
