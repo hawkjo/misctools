@@ -174,3 +174,12 @@ def walk_dict_tree_at_given_depth(d, depth, only_keys=False, prev_args=[]):
         raise AttributeError('Tree has less than requested depth.')
     except:
         raise
+
+
+def python_intervals_overlap(interval1, interval2):
+    query_start, query_end = interval1
+    subject_start, subject_end = interval2
+    return (query_start <= subject_start < query_end
+            or query_start < subject_end <= query_end
+            or subject_start <= query_start < subject_end
+            or subject_start < query_end <= subject_end):
